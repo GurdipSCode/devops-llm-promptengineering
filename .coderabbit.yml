@@ -1,1 +1,67 @@
+language: markdown
+
+reviews:
+  auto_review:
+    enabled: true
+    drafts: false
+
+  review_rules:
+
+    - name: Prompt Structure Enforcement
+      description: Ensure all prompts follow required operational structure
+      path_filters:
+        - "prompts/**/*.md"
+      rules:
+        - Required sections: Role, Task, Inputs, Constraints, Output Format, Failure Modes, Why This Prompt Exists
+
+    - name: DevOps Safety Guardrails
+      description: Prevent unsafe kubectl or destructive guidance
+      path_filters:
+        - "prompts/kubernetes/**/*.md"
+      rules:
+        - Do not recommend destructive commands without warnings
+        - Do not assume cluster-admin privileges
+
+    - name: Eval Coverage Enforcement
+      description: Ensure prompt changes are validated by evals
+      path_filters:
+        - "prompts/**/*.md"
+      rules:
+        - Every prompt must have a corresponding eval
+        - New or changed prompts without eval should fail
+
+    - name: Explainability Enforcement
+      description: Enforce explainability for all prompts
+      path_filters:
+        - "prompts/**/*.md"
+      rules:
+        - Prompts must document why they exist
+        - Prompts must describe failure modes
+
+    - name: Static Analysis Integration
+      description: Integrate Vale + Semgrep findings
+      path_filters:
+        - "prompts/**/*.md"
+      rules:
+        - All Vale errors/warnings must be resolved
+        - All Semgrep errors/warnings must be addressed
+
+  comment_templates:
+    missing_structure: |
+      ❌ Prompt is missing required sections (Role, Task, Inputs, Constraints, Output Format, Failure Modes, Why This Prompt Exists).
+
+    unsafe_operation: |
+      ⚠️ Prompt may suggest unsafe operations (kubectl delete/scale/drain). Add guardrails or warnings.
+
+    missing_eval: |
+      ❌ Prompt changed or new without corresponding evaluation. Please add eval coverage.
+
+    explainability_gap: |
+      ⚠️ Explainability gap detected. Document why the prompt exists and what failure looks like.
+
+    semgrep_violation: |
+      ⚠️ Semgrep detected an issue. See pipeline logs for details.
+
+    vale_violation: |
+      ⚠️ Vale detected a style or tone issue. Resolve before merging.
 
